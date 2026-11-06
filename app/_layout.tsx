@@ -1,56 +1,92 @@
+import 'react-native-gesture-handler';
+import { Caveat_700Bold } from '@expo-google-fonts/caveat';
+import {
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_600SemiBold,
+  DMSans_700Bold,
+} from '@expo-google-fonts/dm-sans';
+import {
+  Fraunces_500Medium_Italic,
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+} from '@expo-google-fonts/fraunces';
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { Stack, router } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
-import { useColorScheme } from '@/components/useColorScheme';
+import { FoodAlertBanner } from '@/components/FoodAlertBanner';
+import { colors } from '@/constants/theme';
+import { AppProvider, useApp } from '@/context/AppContext';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   anchor: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Fraunces_500Medium_Italic,
+    Fraunces_600SemiBold,
+    Fraunces_700Bold,
+    DMSans_400Regular,
+    DMSans_500Medium,
+    DMSans_600SemiBold,
+    DMSans_700Bold,
+    Caveat_700Bold,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  if (!loaded) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <AppProvider>
+        <Shell />
+      </AppProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function Shell() {
+  const { ready } = useApp();
+
+  useEffect(() => {
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const id = response.notification.request.content.data?.restaurantId;
+      if (typeof id === 'string') {
+        router.push({ pathname: '/restaurant/[id]', params: { id } });
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <StatusBar style="dark" />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="restaurant/[id]" />
+        <Stack.Screen name="write-review" options={{ presentation: 'modal' }} />
       </Stack>
-    </ThemeProvider>
+      <FoodAlertBanner />
+    </View>
   );
 }

@@ -1,18 +1,20 @@
 {
   "expo": {
-    "name": "food-app",
+    "name": "Savor",
     "slug": "food-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "foodapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "savor",
+    "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.portfolio.savor"
     },
     "android": {
+      "package": "com.portfolio.savor",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#F6F1E8",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -31,7 +33,20 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#F6F1E8"
+        }
+      ],
+      "expo-image",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Savor uses your location while the app is open to measure distance to restaurants and to tell you when a place matches your taste and you are nearby."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#F39B34"
         }
       ]
     ],
